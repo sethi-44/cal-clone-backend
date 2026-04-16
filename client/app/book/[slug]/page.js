@@ -9,12 +9,14 @@ export default function BookingPage() {
   const [event, setEvent] = useState(null);
   const [date, setDate] = useState("");
   const [slots, setSlots] = useState([]);
+  const [prevSlots, setPrevSlots] = useState([]);
+  const [error, setError] = useState("");
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [form, setForm] = useState({ name: "", email: "" });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Fetch event by slug
+  // Fetch event
   useEffect(() => {
     fetch("http://localhost:5000/api/events")
       .then(res => res.json())
@@ -28,13 +30,24 @@ export default function BookingPage() {
   useEffect(() => {
     if (!date || !event) return;
 
-    fetch(`http://localhost:5000/api/slots/${event.id}?date=${date}`)
-      .then(res => res.json())
-      .then(data => setSlots(data));
+    const fetchSlots = async () => {
+      const res = await fetch(
+        `http://localhost:5000/api/slots/${event.id}?date=${date}`
+      );
+      const data = await res.json();
+      setSlots(data);
+    };
+
+    fetchSlots();
+    const interval = setInterval(fetchSlots, 5000);
+
+    return () => clearInterval(interval);
   }, [date, event]);
 
   if (!event) return <p className="p-6">Loading...</p>;
+  // console.log("SLOTS:", slots);
 
+  // ✅ Success Screen
   if (success) {
     return (
       <div className="p-6 max-w-xl mx-auto text-center">
@@ -42,7 +55,7 @@ export default function BookingPage() {
           🎉 Booking Confirmed!
         </h1>
         <p className="mb-4">
-          Your meeting at {selectedSlot?.start} has been scheduled.
+          Your meeting at {selectedSlot} has been scheduled.
         </p>
 
         <button
@@ -57,35 +70,43 @@ export default function BookingPage() {
       </div>
     );
   }
+
   return (
-    <div className="p-6 max-w-xl">
+    <div className="p-6 max-w-xl mx-auto">
       <h1 className="text-xl font-bold mb-4">{event.title}</h1>
 
       {/* Date Picker */}
       <input
         type="date"
-        className="border p-2 mb-4"
+        className="border p-2 mb-4 w-full"
         onChange={(e) => {
           setDate(e.target.value);
           setSelectedSlot(null);
         }}
       />
 
-      {/* No slots message */}
+      {/* No slots */}
       {slots.length === 0 && date && (
         <p className="text-gray-500 mb-4">
           No availability for selected date
         </p>
       )}
-
+      
       {/* Slots */}
       <div className="grid grid-cols-3 gap-2">
-        {slots.map((slot, i) => (
+        {slots.filter(slot => slot.available).map((slot, i) => (
           <button
             key={i}
-            onClick={() => setSelectedSlot(slot)}
-            className={`border p-2 ${
-              selectedSlot?.start === slot.start
+            disabled={!slot.available}
+            onClick={() => {
+              if (!slot.available) return;
+              setSelectedSlot(slot.start);
+              setError(""); // reset error
+            }}
+            className={`border p-2 rounded transition-all duration-200 ${
+              !slot.available
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : selectedSlot === slot.start
                 ? "bg-black text-white"
                 : "hover:bg-black hover:text-white"
             }`}
@@ -99,8 +120,12 @@ export default function BookingPage() {
       {selectedSlot && (
         <div className="mt-6">
           <h2 className="font-semibold mb-2">
-            Book at {selectedSlot.start}
+            Book at {selectedSlot}
           </h2>
+
+          {error && (
+            <p className="text-red-500 mb-2">{error}</p>
+          )}
 
           <input
             placeholder="Your name"
@@ -122,17 +147,27 @@ export default function BookingPage() {
 
           <button
             disabled={loading}
-            className="bg-black text-white px-4 py-2"
+            className="bg-black text-white px-4 py-2 w-full"
             onClick={async () => {
               try {
                 setLoading(true);
+                setError("");
 
-                const start = new Date(
-                  `${date}T${selectedSlot.start}:00`
-                );
-
+                const start = new Date(`${date}T${selectedSlot}:00`);
                 const end = new Date(
                   start.getTime() + event.duration * 60000
+                );
+
+                // 🧠 Save previous slots
+                setPrevSlots(slots);
+
+                // ⚡ Optimistic UI
+                setSlots(prev =>
+                  prev.map(s =>
+                    s.start === selectedSlot
+                      ? { ...s, available: false }
+                      : s
+                  )
                 );
 
                 const res = await fetch(
@@ -154,26 +189,21 @@ export default function BookingPage() {
 
                 const data = await res.json();
 
-                // ✅ Handle backend errors properly
                 if (!res.ok) {
-                  alert(data.message || "Booking failed");
+                  // ❌ rollback
+                  setSlots(prevSlots);
+                  setError(data.message || "Booking failed");
                   return;
                 }
 
-                // ✅ Success only if backend confirms
+                // ✅ success
                 setSuccess(true);
-                // Refresh slots
-                const slotRes = await fetch(
-                  `http://localhost:5000/api/slots/${event.id}?date=${date}`
-                );
-                const updated = await slotRes.json();
-                setSlots(updated);
-
                 setSelectedSlot(null);
                 setForm({ name: "", email: "" });
 
               } catch (err) {
-                alert("Something went wrong");
+                setSlots(prevSlots); // rollback
+                setError("Something went wrong");
               } finally {
                 setLoading(false);
               }
