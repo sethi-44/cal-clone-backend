@@ -23,10 +23,10 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "pg": "^8.20.0",
+    "prisma": "^5.22.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14",
-    "prisma": "^7.7.0"
+    "nodemon": "^3.1.14"
   }
 }
