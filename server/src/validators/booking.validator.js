@@ -8,4 +8,9 @@ const createBookingSchema = z.object({
   endTime: z.string().datetime({ message: "Invalid end time" }),
 });
 
-module.exports = { createBookingSchema };
+const rescheduleBookingSchema = z.object({
+  startTime: z.string().datetime({ message: "Invalid start time" }),
+  endTime: z.string().datetime({ message: "Invalid end time" }),
+});
+
+module.exports = { createBookingSchema, rescheduleBookingSchema };

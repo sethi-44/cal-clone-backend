@@ -69,6 +69,21 @@ exports.getBookingsByEventType = async (eventTypeId) => {
   });
 };
 
+exports.getBookingById = async (id) => {
+  const booking = await prisma.booking.findUnique({
+    where: { id },
+    include: {
+      eventType: {
+        select: { title: true, slug: true, duration: true, description: true },
+      },
+    },
+  });
+  if (!booking) {
+    throw new AppError("Booking not found", 404);
+  }
+  return booking;
+};
+
 exports.cancelBooking = async (id) => {
   try {
     return await prisma.booking.update({
@@ -81,6 +96,49 @@ exports.cancelBooking = async (id) => {
   } catch (err) {
     if (err.code === "P2025") {
       throw new AppError("Booking not found", 404);
+    }
+    throw err;
+  }
+};
+
+exports.rescheduleBooking = async (id, data) => {
+  const { startTime, endTime } = data;
+
+  const start = new Date(startTime);
+  start.setSeconds(0, 0);
+  const end = new Date(endTime);
+  end.setSeconds(0, 0);
+
+  if (start <= new Date()) {
+    throw new AppError("Cannot reschedule to a past slot", 400);
+  }
+
+  const booking = await prisma.booking.findUnique({
+    where: { id },
+    include: { eventType: true },
+  });
+
+  if (!booking || booking.status !== "CONFIRMED") {
+    throw new AppError("Booking not found or not active", 404);
+  }
+
+  const durationMs = end.getTime() - start.getTime();
+  const expectedMs = booking.eventType.duration * 60 * 1000;
+  if (Math.abs(durationMs - expectedMs) > 60000) {
+    throw new AppError("Booking duration does not match event type", 400);
+  }
+
+  try {
+    return await prisma.booking.update({
+      where: { id },
+      data: {
+        startTime: start,
+        endTime: end,
+      },
+    });
+  } catch (err) {
+    if (err.code === "P2002") {
+      throw new AppError("This time slot has already been booked", 409);
     }
     throw err;
   }

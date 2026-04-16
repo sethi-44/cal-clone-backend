@@ -10,9 +10,10 @@ function fetchTz() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
-export default function BookingPage() {
-  const { slug } = useParams();
+export default function ReschedulePage() {
+  const { id } = useParams();
 
+  const [booking, setBooking] = useState(null);
   const [event, setEvent] = useState(null);
   const [error, setError] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -27,18 +28,20 @@ export default function BookingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(null);
 
-  // Computed state
-  const isFormValid = form.name.trim().length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
-  const availableDays = [1, 2, 3, 4, 5]; // Note: in real app, fetch from event's generic availability
+  const availableDays = [1, 2, 3, 4, 5]; 
 
   const fetchSlotsRef = useRef(null);
 
   useEffect(() => {
-    api.getEventBySlug(slug)
-      .then(setEvent)
-      .catch(() => setError("Event not found or link is invalid."))
+    api.getBookingById(id)
+      .then((data) => {
+        setBooking(data);
+        setEvent(data.eventType);
+        setForm({ name: data.name, email: data.email });
+      })
+      .catch((err) => setError("Booking not found or link is invalid."))
       .finally(() => setInitialLoading(false));
-  }, [slug]);
+  }, [id]);
 
   const fetchSlots = async () => {
     if (!event || !date) return;
@@ -62,39 +65,32 @@ export default function BookingPage() {
   }, [date]);
 
   const handleBooking = async () => {
-    if (submitting || !selectedSlot || !isFormValid) return; // EC-4 Fix
+    if (submitting || !selectedSlot) return;
 
     setSubmitting(true);
     setError(null);
 
-    // EC-14 Stale snapshot protection
     const snapshotSlots = [...slots];
     setSlots(slots.map(s => s.start === selectedSlot.start ? { ...s, available: false } : s));
 
     try {
-      // Use exact UTC time from server to guarantee timezone matching
       const startTimeUTC = new Date(selectedSlot.utcStart);
       const endTimeUTC = new Date(selectedSlot.utcEnd);
 
-      const booking = await api.createBooking({
-        eventTypeId: event.id,
-        name: form.name.trim(),
-        email: form.email.trim(),
+      const updatedBooking = await api.rescheduleBooking(id, {
         startTime: startTimeUTC.toISOString(),
         endTime: endTimeUTC.toISOString(),
       });
 
-      setBookingSuccess(booking);
-      window.history.replaceState(null, "", window.location.href); // EC-17 Fix
+      setBookingSuccess(updatedBooking);
+      window.history.replaceState(null, "", window.location.href);
     } catch (err) {
-      // Restore snapshot
       setSlots(snapshotSlots);
       
       if (err instanceof TypeError && err.message.includes("fetch")) {
         setError("Network error. Please try again.");
       } else {
-        setError(err.message || "Failed to book slot");
-        // Always refresh on error just in case
+        setError(err.message || "Failed to reschedule");
         fetchSlotsRef.current();
       }
     } finally {
@@ -111,7 +107,7 @@ export default function BookingPage() {
   }
 
   if (bookingSuccess) {
-    return <BookingConfirmation booking={bookingSuccess} event={event} onBookAnother={() => { setBookingSuccess(null); setSelectedSlot(null); setDate(""); setForm({name:"", email:""}); }} />;
+    return <BookingConfirmation booking={bookingSuccess} event={event} onBookAnother={() => window.location.href = '/dashboard'} isReschedule={true} />;
   }
 
   return (
@@ -203,28 +199,23 @@ export default function BookingPage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                <div>
-                  <label style={{ fontSize: "14px", fontWeight: 500, marginBottom: "6px", display: "block" }}>Name</label>
-                  <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                    style={{ width: "100%", padding: "12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", fontSize: "15px" }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: "14px", fontWeight: 500, marginBottom: "6px", display: "block" }}>Email</label>
-                  <input type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})}
-                    style={{ width: "100%", padding: "12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", fontSize: "15px" }} />
+                <div style={{ padding: "16px", background: "var(--color-bg-primary)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)" }}>
+                  <div style={{ fontSize: "14px", color: "var(--color-text-secondary)", marginBottom: "4px" }}>Rescheduling for</div>
+                  <div style={{ fontWeight: 600 }}>{form.name}</div>
+                  <div style={{ fontSize: "14px", color: "var(--color-text-secondary)" }}>{form.email}</div>
                 </div>
 
                 <div style={{ marginTop: "12px" }}>
                   <button 
                     onClick={handleBooking} 
-                    disabled={submitting || !isFormValid}
+                    disabled={submitting}
                     style={{
                       width: "100%", padding: "16px", background: "var(--color-brand)", color: "white", 
                       fontSize: "16px", fontWeight: 600, border: "none", borderRadius: "var(--radius-md)",
-                      cursor: (submitting || !isFormValid) ? "not-allowed" : "pointer", opacity: (submitting || !isFormValid) ? 0.7 : 1, transition: "var(--transition-fast)"
+                      cursor: submitting ? "not-allowed" : "pointer", opacity: submitting ? 0.7 : 1, transition: "var(--transition-fast)"
                     }}
                   >
-                    {submitting ? "Confirming..." : "Confirm Booking"}
+                    {submitting ? "Rescheduling..." : "Confirm Reschedule"}
                   </button>
                 </div>
               </div>

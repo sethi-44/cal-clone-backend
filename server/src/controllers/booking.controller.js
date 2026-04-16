@@ -27,10 +27,28 @@ exports.getBookings = async (req, res, next) => {
   }
 };
 
+exports.getBookingById = async (req, res, next) => {
+  try {
+    const booking = await service.getBookingById(req.params.id);
+    res.json(booking);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.cancelBooking = async (req, res, next) => {
   try {
     await service.cancelBooking(req.params.id);
     res.json({ message: "Booking cancelled" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.rescheduleBooking = async (req, res, next) => {
+  try {
+    const booking = await service.rescheduleBooking(req.params.id, req.body);
+    res.json(booking);
   } catch (err) {
     next(err);
   }

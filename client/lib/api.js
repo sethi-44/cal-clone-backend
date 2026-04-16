@@ -48,7 +48,10 @@ export const api = {
   // Bookings
   getAllBookings: () => request("/api/bookings"),
   getBookings: (eventTypeId) => request(`/api/bookings/${eventTypeId}`),
+  getBookingById: (id) => request(`/api/bookings/id/${id}`),
   createBooking: (data) =>
     request("/api/bookings", { method: "POST", body: JSON.stringify(data) }),
   cancelBooking: (id) => request(`/api/bookings/${id}`, { method: "DELETE" }),
+  rescheduleBooking: (id, data) => 
+    request(`/api/bookings/${id}/reschedule`, { method: "PATCH", body: JSON.stringify(data) }),
 };

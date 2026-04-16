@@ -22,7 +22,7 @@ function DetailRow({ icon, label, value }) {
   );
 }
 
-export default function BookingConfirmation({ booking, event, onBookAnother }) {
+export default function BookingConfirmation({ booking, event, onBookAnother, isReschedule = false }) {
   
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -63,7 +63,7 @@ export default function BookingConfirmation({ booking, event, onBookAnother }) {
       </div>
 
       <h1 style={{ fontSize: "24px", fontWeight: 700, marginBottom: "8px" }}>
-        This meeting is scheduled
+        {isReschedule ? "This meeting is rescheduled" : "This meeting is scheduled"}
       </h1>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: "32px", fontSize: "14px" }}>
         We sent an email with a calendar invitation with the details to you and the participants.
@@ -102,7 +102,7 @@ export default function BookingConfirmation({ booking, event, onBookAnother }) {
           transition: "var(--transition-fast)",
         }}
       >
-        Book another meeting
+        {isReschedule ? "Return to Dashboard" : "Book another meeting"}
       </button>
     </div>
   );

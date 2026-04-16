@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const { generateSlots } = require("../utils/slot.util");
+const { fromZonedTime } = require("date-fns-tz");
 
 /**
  * Get available slots for an event type on a specific date.
@@ -8,12 +9,12 @@ exports.getAvailableSlots = async (eventTypeId, dateStr) => {
   const event = await prisma.eventType.findUnique({
     where: { id: eventTypeId },
   });
-  if (!event) return [];
+  if (!event) return { hostTimezone: "UTC", slots: [] };
 
   const availability = await prisma.availability.findMany({
     where: { eventTypeId },
   });
-  if (!availability.length) return [];
+  if (!availability.length) return { hostTimezone: "UTC", slots: [] };
 
   // Determine the timezone from availability records
   const hostTimezone = availability[0].timezone || "UTC";
@@ -36,22 +37,25 @@ exports.getAvailableSlots = async (eventTypeId, dateStr) => {
   const dayOfWeek = dayMap[dayName];
 
   const dayAvail = availability.filter((a) => a.dayOfWeek === dayOfWeek);
-  if (!dayAvail.length) return [];
+  if (!dayAvail.length) return { hostTimezone, slots: [] };
 
   // Generate all possible slots (with buffer time)
   const allSlots = dayAvail.flatMap((a) =>
     generateSlots(a.startTime, a.endTime, event.duration, event.bufferTime || 0)
   );
 
-  // Get existing bookings for the date
-  const startOfDay = new Date(dateStr + "T00:00:00Z");
-  const endOfDay = new Date(dateStr + "T23:59:59.999Z");
+  // Get existing bookings for the date with bounds padding for timezone overlaps
+  const gteDate = new Date(dateStr + "T00:00:00Z");
+  gteDate.setHours(gteDate.getHours() - 24);
+
+  const lteDate = new Date(dateStr + "T23:59:59.999Z");
+  lteDate.setHours(lteDate.getHours() + 24);
 
   const bookings = await prisma.booking.findMany({
     where: {
       eventTypeId,
       status: "CONFIRMED",
-      startTime: { gte: startOfDay, lte: endOfDay },
+      startTime: { gte: gteDate, lte: lteDate },
     },
   });
 
@@ -80,14 +84,22 @@ exports.getAvailableSlots = async (eventTypeId, dateStr) => {
   }
 
   // Mark availability and filter past slots
-  return allSlots
+  const slots = allSlots
     .filter((slot) => {
       if (isPastFilter && slot.start <= currentTimeStr) return false;
       return true;
     })
-    .map((slot) => ({
-      start: slot.start,
-      end: slot.end,
-      available: !bookedSlots.includes(slot.start),
-    }));
+    .map((slot) => {
+      const utcStart = fromZonedTime(`${dateStr}T${slot.start}:00`, hostTimezone).toISOString();
+      const utcEnd = fromZonedTime(`${dateStr}T${slot.end}:00`, hostTimezone).toISOString();
+      return {
+        start: slot.start,
+        end: slot.end,
+        utcStart,
+        utcEnd,
+        available: !bookedSlots.includes(slot.start),
+      };
+    });
+
+  return { hostTimezone, slots };
 };

@@ -174,12 +174,20 @@ export default function DashboardPage() {
                 </div>
 
                 {tab === "upcoming" && (
-                  <button onClick={() => handleCancel(booking.id)} style={{
-                    padding: "8px 12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)",
-                    background: "transparent", color: "var(--color-error)", fontSize: "13px", cursor: "pointer",
-                  }}>
-                    Cancel
-                  </button>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <a href={`/reschedule/${booking.id}`} style={{
+                      padding: "8px 12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)",
+                      background: "transparent", color: "var(--color-text-primary)", fontSize: "13px", cursor: "pointer", textDecoration: "none"
+                    }}>
+                      Reschedule
+                    </a>
+                    <button onClick={() => handleCancel(booking.id)} style={{
+                      padding: "8px 12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)",
+                      background: "transparent", color: "var(--color-error)", fontSize: "13px", cursor: "pointer",
+                    }}>
+                      Cancel
+                    </button>
+                  </div>
                 )}
               </div>
             );
