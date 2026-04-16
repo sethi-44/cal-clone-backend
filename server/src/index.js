@@ -25,7 +25,8 @@ app.get("/", (req, res) => {
 
 // Centralized error handler (must be after routes)
 app.use(errorHandler);
+const PORT = process.env.PORT || 5000;
 
-app.listen(env.PORT, () => {
-  console.log(`Server running on port ${env.PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
