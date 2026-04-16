@@ -1,63 +1,37 @@
 const service = require("../services/booking.service");
-const prisma = require("../config/prisma");
 
-exports.createBooking = async (req, res) => {
+exports.createBooking = async (req, res, next) => {
   try {
     const booking = await service.createBooking(req.body);
-    res.json(booking);
+    res.status(201).json(booking);
   } catch (err) {
-    res.status(400).json({
-      message: err.message,
-    });
+    next(err);
   }
 };
 
-exports.getBookings = async (req, res) => {
+exports.getAllBookings = async (req, res, next) => {
   try {
-    const { eventTypeId } = req.params;
-
-    if (!eventTypeId) {
-      return res.status(400).json({
-        error: "eventTypeId is required",
-      });
-    }
-
-    console.log("Fetching bookings for:", eventTypeId);
-
-    const bookings = await prisma.booking.findMany({
-      where: {
-        eventTypeId: String(eventTypeId), 
-      },
-      orderBy: { startTime: "asc" },
-    });
-
-    console.log("Bookings found:", bookings);
-
+    const bookings = await service.getAllBookings();
     res.json(bookings);
   } catch (err) {
-    console.error("🔥 GET BOOKINGS ERROR:", err);
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-exports.cancelBooking = async (req, res) => {
+exports.getBookings = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const bookings = await service.getBookingsByEventType(req.params.eventTypeId);
+    res.json(bookings);
+  } catch (err) {
+    next(err);
+  }
+};
 
-
-    if (!id) {
-      return res.status(400).json({
-        error: "Booking id is required",
-      });
-    }
-
-    await prisma.booking.delete({
-      where: { id: String(id) },
-    });
-
+exports.cancelBooking = async (req, res, next) => {
+  try {
+    await service.cancelBooking(req.params.id);
     res.json({ message: "Booking cancelled" });
   } catch (err) {
-    console.error("🔥 CANCEL BOOKING ERROR:", err);
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };

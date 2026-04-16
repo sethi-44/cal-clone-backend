@@ -1,71 +1,57 @@
 const eventService = require("../services/event.service");
 
-exports.createEvent = async (req, res) => {
+exports.createEvent = async (req, res, next) => {
   try {
     const event = await eventService.createEvent(req.body);
-    res.json(event);
+    res.status(201).json(event);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-exports.getAllEvents = async (req, res) => {
+exports.getAllEvents = async (req, res, next) => {
   try {
     const events = await eventService.getAllEvents();
     res.json(events);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-exports.getEventById = async (req, res) => {
+exports.getEventById = async (req, res, next) => {
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({ error: "ID is required" });
-    }
-
-    const event = await eventService.getEventById(id);
-
-    if (!event) {
-      return res.status(404).json({ error: "Event not found" });
-    }
-
+    const event = await eventService.getEventById(req.params.id);
+    if (!event) return res.status(404).json({ error: "Event not found" });
     res.json(event);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-exports.updateEvent = async (req, res) => {
+exports.getEventBySlug = async (req, res, next) => {
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({ error: "ID is required" });
-    }
-
-    const event = await eventService.updateEvent(id, req.body);
-
+    const event = await eventService.getEventBySlug(req.params.slug);
+    if (!event) return res.status(404).json({ error: "Event not found" });
     res.json(event);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-exports.deleteEvent = async (req, res) => {
+exports.updateEvent = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const event = await eventService.updateEvent(req.params.id, req.body);
+    res.json(event);
+  } catch (err) {
+    next(err);
+  }
+};
 
-    if (!id) {
-      return res.status(400).json({ error: "ID is required" });
-    }
-
-    await eventService.deleteEvent(id);
-
+exports.deleteEvent = async (req, res, next) => {
+  try {
+    await eventService.deleteEvent(req.params.id);
     res.json({ message: "Event deleted" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };

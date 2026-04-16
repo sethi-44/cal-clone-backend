@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -16,10 +14,12 @@ model EventType {
   id          String   @id @default(uuid())
   title       String
   description String?
-  duration    Int
+  duration    Int      // in minutes
   slug        String   @unique
+  bufferTime  Int      @default(0) // minutes between meetings
 
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   bookings     Booking[]
   availability Availability[]
@@ -35,10 +35,12 @@ model Availability {
   timezone    String
 
   eventType   EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+
+  @@index([eventTypeId, dayOfWeek])
 }
 
 model Booking {
-  id          String   @id @default(uuid())
+  id          String        @id @default(uuid())
   eventTypeId String
 
   name        String
@@ -47,9 +49,20 @@ model Booking {
   startTime   DateTime @db.Timestamptz(3)
   endTime     DateTime @db.Timestamptz(3)
 
+  status      BookingStatus @default(CONFIRMED)
+
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  cancelledAt DateTime?
 
   eventType   EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
 
   @@unique([eventTypeId, startTime])
+  @@index([startTime])
+  @@index([status])
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
 }
