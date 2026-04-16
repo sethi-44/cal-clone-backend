@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const controller = require("../controllers/slot.controller");
+const controller = require("../controllers/slot.controller.js");
 
 router.get("/:eventTypeId", controller.getSlots);
 
