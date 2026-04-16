@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const { AppError } = require("../middleware/errorHandler");
+const emailService = require("./email.service");
 
 exports.createBooking = async (data) => {
   const { eventTypeId, name, email, startTime, endTime } = data;
@@ -28,7 +29,7 @@ exports.createBooking = async (data) => {
   }
 
   try {
-    return await prisma.booking.create({
+    const booking = await prisma.booking.create({
       data: {
         eventTypeId,
         name: name.trim(),
@@ -36,7 +37,15 @@ exports.createBooking = async (data) => {
         startTime: start,
         endTime: end,
       },
+      include: { eventType: true } // Include eventType for the email service
     });
+
+    // Fire and forget email notification
+    emailService.sendConfirmationEmail(booking).catch(err => {
+      console.error("Failed to send confirmation email:", err.message);
+    });
+
+    return booking;
   } catch (err) {
     if (err.code === "P2002") {
       throw new AppError("This time slot has already been booked", 409);
@@ -86,13 +95,18 @@ exports.getBookingById = async (id) => {
 
 exports.cancelBooking = async (id) => {
   try {
-    return await prisma.booking.update({
+    const canceled = await prisma.booking.update({
       where: { id },
       data: {
         status: "CANCELLED",
         cancelledAt: new Date(),
       },
+      include: { eventType: true }
     });
+
+    emailService.sendCancellationEmail(canceled).catch(err => console.error(err));
+
+    return canceled;
   } catch (err) {
     if (err.code === "P2025") {
       throw new AppError("Booking not found", 404);
@@ -129,13 +143,17 @@ exports.rescheduleBooking = async (id, data) => {
   }
 
   try {
-    return await prisma.booking.update({
+    const rescheduled = await prisma.booking.update({
       where: { id },
       data: {
         startTime: start,
         endTime: end,
       },
+      include: { eventType: true }
     });
+
+    emailService.sendRescheduleEmail(rescheduled).catch(err => console.error(err));
+    return rescheduled;
   } catch (err) {
     if (err.code === "P2002") {
       throw new AppError("This time slot has already been booked", 409);

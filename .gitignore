@@ -4,3 +4,6 @@ node_modules
 dist
 build
 generated
+*.docx
+*.pdf
+assignment_content.txt

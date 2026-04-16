@@ -49,24 +49,25 @@ export default function EventsPage() {
   };
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+    <div style={{ animation: "fadeIn 0.4s ease-out" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "32px", paddingBottom: "24px", borderBottom: "1px solid var(--color-border-subtle)" }}>
         <div>
-          <h1 style={{ fontSize: "24px", fontWeight: 700 }}>Event Types</h1>
-          <p style={{ color: "var(--color-text-secondary)", fontSize: "14px", marginTop: "4px" }}>
+          <h1 style={{ fontSize: "28px", fontWeight: 700, letterSpacing: "-0.02em" }}>Event Types</h1>
+          <p style={{ color: "var(--color-text-tertiary)", fontSize: "15px", marginTop: "4px" }}>
             Create and manage your default event types
           </p>
         </div>
         <Link href="/create-event" style={{
-          padding: "10px 16px",
+          padding: "10px 18px",
           background: "var(--color-brand)",
           color: "white",
           borderRadius: "var(--radius-md)",
           fontSize: "14px",
-          fontWeight: 500,
+          fontWeight: 600,
+          boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
           transition: "var(--transition-fast)",
         }}>
-          + New Event Type
+          Create
         </Link>
       </div>
 

@@ -27,120 +27,112 @@ export default function EventCard({ event, onEdit, onDelete, colorIndex = 0 }) {
   };
 
   return (
-    <div style={{
+    <div className="card" style={{
       position: "relative",
-      background: "var(--color-bg-primary)",
-      border: "1px solid var(--color-border)",
-      borderRadius: "var(--radius-md)",
-      overflow: "hidden",
-      transition: "var(--transition-base)",
-      boxShadow: "var(--shadow-sm)",
+      padding: "20px",
       display: "flex",
       flexDirection: "column",
+      height: "100%",
+      cursor: "pointer",
     }}
-    onMouseEnter={e => e.currentTarget.style.boxShadow = "var(--shadow-md)"}
-    onMouseLeave={e => e.currentTarget.style.boxShadow = "var(--shadow-sm)"}
     >
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "4px", background: color }} />
-
-      <div style={{ padding: "20px", display: "flex", flexDirection: "column", flex: 1 }}>
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: "12px",
-        }}>
-          <div>
-            <h3 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "4px", color: "var(--color-text-primary)" }}>
-              {event.title}
-            </h3>
-            <p style={{ fontSize: "13px", color: "var(--color-text-secondary)", margin: 0 }}>
-              {event.description || "No description"}
-            </p>
-          </div>
-          <span style={{
-            fontSize: "12px",
-            fontWeight: 500,
-            padding: "4px 10px",
-            borderRadius: "20px",
-            background: "var(--color-bg-tertiary)",
-            color: "var(--color-text-secondary)",
-            whiteSpace: "nowrap",
-          }}>
-            {event.duration} min
-          </span>
-        </div>
-
-        <p style={{
-          fontSize: "13px",
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        marginBottom: "8px",
+      }}>
+        <h3 style={{ fontSize: "16px", fontWeight: 600, color: "var(--color-text-primary)", letterSpacing: "-0.01em" }}>
+          {event.title}
+        </h3>
+        <span style={{
+          fontSize: "12px",
+          fontWeight: 600,
           color: "var(--color-text-tertiary)",
-          fontFamily: "monospace",
-          marginBottom: "16px",
         }}>
-          /{event.slug}
-        </p>
-        
-        <div style={{ flex: 1 }} />
+          {event.duration}m
+        </span>
+      </div>
 
-        <div style={{
-          display: "flex",
-          gap: "8px",
-          paddingTop: "16px",
-          borderTop: "1px solid var(--color-border)",
-          alignItems: "center"
+      <p style={{ 
+        fontSize: "14px", 
+        color: "var(--color-text-tertiary)", 
+        marginBottom: "16px",
+        lineHeight: "1.5",
+        display: "-webkit-box",
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: "vertical",
+        overflow: "hidden",
+      }}>
+        {event.description || "No description set for this event type."}
+      </p>
+
+      <div style={{
+        fontSize: "13px",
+        color: "var(--color-text-tertiary)",
+        marginBottom: "20px",
+        display: "flex",
+        alignItems: "center",
+        gap: "4px",
+      }}>
+        <span style={{ opacity: 0.5 }}>calclone.com/</span>
+        <span style={{ color: "var(--color-text-secondary)", fontWeight: 500 }}>{event.slug}</span>
+      </div>
+      
+      <div style={{ flex: 1 }} />
+
+      <div style={{
+        display: "flex",
+        gap: "8px",
+        paddingTop: "16px",
+        borderTop: "1px solid var(--color-border-subtle)",
+        alignItems: "center"
+      }}>
+        <button onClick={copyLink} style={{
+          fontSize: "13px",
+          fontWeight: 600,
+          color: copied ? "var(--color-success)" : "var(--color-text-primary)",
+          background: "var(--color-bg-primary)",
+          border: "1px solid var(--color-border)",
+          padding: "6px 12px",
+          borderRadius: "var(--radius-sm)",
+          cursor: "pointer",
+          flex: 1,
+          transition: "var(--transition-fast)",
         }}>
-          <Link href={`/book/${event.slug}`} target="_blank"
-            style={{
-              fontSize: "13px",
-              color: "var(--color-text-secondary)",
-              textDecoration: "none",
-              padding: "6px 12px",
-              borderRadius: "var(--radius-sm)",
-              border: "1px solid var(--color-border)",
-              transition: "var(--transition-fast)",
-              background: "var(--color-bg-primary)",
-          }}>
-            Preview
-          </Link>
+          {copied ? "Copied!" : "Copy Link"}
+        </button>
 
-          <button onClick={copyLink} style={{
+        <Link href={`/book/${event.slug}`} target="_blank"
+          style={{
             fontSize: "13px",
-            color: copied ? "var(--color-success)" : "var(--color-text-secondary)",
-            background: "transparent",
+            fontWeight: 600,
+            color: "var(--color-text-primary)",
+            background: "var(--color-bg-primary)",
             border: "1px solid var(--color-border)",
             padding: "6px 12px",
             borderRadius: "var(--radius-sm)",
-            cursor: "pointer",
+            textAlign: "center",
+            flex: 1,
             transition: "var(--transition-fast)",
-          }}>
-            {copied ? "✓ Copied" : "Copy Link"}
-          </button>
+        }}>
+          Preview
+        </Link>
 
-          <div style={{ flex: 1 }} />
-
-          <Link href={`/edit-event/${event.id}`} style={{
-            fontSize: "13px",
-            color: "var(--color-text-secondary)",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            padding: "6px 8px",
-            textDecoration: "none"
-          }}>
-            Edit
-          </Link>
-
-          <button onClick={() => onDelete(event)} style={{
-            fontSize: "13px",
-            color: "var(--color-error)",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            padding: "6px 8px",
-          }}>
-            Delete
-          </button>
-        </div>
+        <Link href={`/edit-event/${event.id}`} style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "32px",
+          height: "32px",
+          borderRadius: "var(--radius-sm)",
+          border: "1px solid var(--color-border)",
+          fontSize: "14px",
+          color: "var(--color-text-secondary)",
+          transition: "var(--transition-fast)",
+        }} title="Edit">
+          ⚙️
+        </Link>
       </div>
     </div>
   );

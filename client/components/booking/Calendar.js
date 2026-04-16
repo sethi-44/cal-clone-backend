@@ -72,8 +72,7 @@ export default function Calendar({ selectedDate, onSelectDate, availableDays = [
     <div style={{
       background: "var(--color-bg-primary)",
       borderRadius: "var(--radius-lg)",
-      border: "1px solid var(--color-border)",
-      padding: "20px",
+      padding: "8px",
       width: "100%",
       maxWidth: "350px",
     }}>
@@ -82,59 +81,73 @@ export default function Calendar({ selectedDate, onSelectDate, availableDays = [
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: "20px",
+        marginBottom: "24px",
+        padding: "0 8px"
       }}>
-        <button
-          onClick={prevMonth}
-          disabled={!canGoPrev}
-          type="button"
-          style={{
-            background: "none",
-            border: "none",
-            fontSize: "18px",
-            cursor: canGoPrev ? "pointer" : "not-allowed",
-            opacity: canGoPrev ? 1 : 0.3,
-            padding: "4px 8px",
-            borderRadius: "var(--radius-sm)",
-            color: "var(--color-text-primary)",
-          }}
-        >
-          ‹
-        </button>
-        <span style={{ fontWeight: 600, fontSize: "15px" }}>
-          {MONTH_NAMES[viewMonth]} {viewYear}
+        <span style={{ fontWeight: 600, fontSize: "16px", color: "var(--color-text-primary)" }}>
+          {MONTH_NAMES[viewMonth]} <span style={{ color: "var(--color-text-tertiary)", fontWeight: 400 }}>{viewYear}</span>
         </span>
-        <button
-          onClick={nextMonth}
-          type="button"
-          style={{
-            background: "none",
-            border: "none",
-            fontSize: "18px",
-            cursor: "pointer",
-            padding: "4px 8px",
-            borderRadius: "var(--radius-sm)",
-            color: "var(--color-text-primary)",
-          }}
-        >
-          ›
-        </button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button
+            onClick={prevMonth}
+            disabled={!canGoPrev}
+            type="button"
+            style={{
+              background: "none",
+              border: "1px solid var(--color-border-subtle)",
+              fontSize: "14px",
+              cursor: canGoPrev ? "pointer" : "not-allowed",
+              opacity: canGoPrev ? 1 : 0.4,
+              width: "32px",
+              height: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "var(--radius-sm)",
+              color: "var(--color-text-secondary)",
+              transition: "var(--transition-fast)",
+            }}
+          >
+            ←
+          </button>
+          <button
+            onClick={nextMonth}
+            type="button"
+            style={{
+              background: "none",
+              border: "1px solid var(--color-border-subtle)",
+              fontSize: "14px",
+              cursor: "pointer",
+              width: "32px",
+              height: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "var(--radius-sm)",
+              color: "var(--color-text-secondary)",
+              transition: "var(--transition-fast)",
+            }}
+          >
+            →
+          </button>
+        </div>
       </div>
 
       {/* Day Headers */}
       <div style={{
         display: "grid",
         gridTemplateColumns: "repeat(7, 1fr)",
-        gap: "2px",
-        marginBottom: "8px",
+        gap: "4px",
+        marginBottom: "12px",
       }}>
         {DAY_NAMES.map(d => (
           <div key={d} style={{
             textAlign: "center",
-            fontSize: "12px",
-            fontWeight: 500,
+            fontSize: "11px",
+            fontWeight: 600,
             color: "var(--color-text-tertiary)",
-            padding: "4px 0",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
           }}>
             {d}
           </div>
@@ -145,7 +158,7 @@ export default function Calendar({ selectedDate, onSelectDate, availableDays = [
       <div style={{
         display: "grid",
         gridTemplateColumns: "repeat(7, 1fr)",
-        gap: "2px",
+        gap: "4px",
       }}>
         {calendarDays.map((day, i) => {
           if (!day) {
@@ -159,30 +172,40 @@ export default function Calendar({ selectedDate, onSelectDate, availableDays = [
               type="button"
               onClick={() => onSelectDate(day.dateStr)}
               style={{
-                width: "40px",
-                height: "40px",
+                aspectRatio: "1/1",
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                borderRadius: "50%",
-                border: day.isToday ? "1px solid var(--color-border)" : "none",
+                borderRadius: "var(--radius-md)",
+                border: "none",
                 fontSize: "14px",
-                fontWeight: day.isSelected ? 600 : day.isToday ? 500 : 400,
+                fontWeight: day.isSelected ? 600 : 500,
                 cursor: day.isAvailable ? "pointer" : "default",
                 transition: "var(--transition-fast)",
                 background: day.isSelected
                   ? "var(--color-brand)"
-                  : "transparent",
+                  : day.isToday
+                    ? "var(--color-bg-secondary)"
+                    : "transparent",
                 color: day.isSelected
                   ? "var(--color-text-inverse)"
                   : day.isAvailable
                     ? "var(--color-text-primary)"
                     : "var(--color-text-tertiary)",
-                opacity: day.isPast ? 0.3 : 1,
-                margin: "0 auto",
+                position: "relative"
+              }}
+              onMouseEnter={e => {
+                if(day.isAvailable && !day.isSelected) e.target.style.background = "var(--color-bg-hover)";
+              }}
+              onMouseLeave={e => {
+                if(day.isAvailable && !day.isSelected) e.target.style.background = day.isToday ? "var(--color-bg-secondary)" : "transparent";
               }}
             >
               {day.day}
+              {day.isToday && !day.isSelected && (
+                <div style={{ position: "absolute", bottom: "6px", width: "4px", height: "4px", borderRadius: "50%", background: "var(--color-brand)" }} />
+              )}
             </button>
           );
         })}

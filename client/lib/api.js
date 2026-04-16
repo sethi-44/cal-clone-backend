@@ -2,11 +2,13 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 async function request(url, options = {}) {
   const config = {
-    headers: { "Content-Type": "application/json", ...options.headers },
     ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   };
 
-  // Don't stringify body if it's already a string
   if (config.body && typeof config.body !== "string") {
     config.body = JSON.stringify(config.body);
   }
@@ -26,32 +28,22 @@ export const api = {
   getEvents: () => request("/api/events"),
   getEventBySlug: (slug) => request(`/api/events/slug/${slug}`),
   getEventById: (id) => request(`/api/events/${id}`),
-  createEvent: (data) =>
-    request("/api/events", { method: "POST", body: JSON.stringify(data) }),
-  updateEvent: (id, data) =>
-    request(`/api/events/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+  createEvent: (data) => request("/api/events", { method: "POST", body: data }),
+  updateEvent: (id, data) => request(`/api/events/${id}`, { method: "PUT", body: data }),
   deleteEvent: (id) => request(`/api/events/${id}`, { method: "DELETE" }),
 
   // Availability
-  getAvailability: (eventTypeId) =>
-    request(`/api/availability/${eventTypeId}`),
-  setAvailability: (data) =>
-    request("/api/availability", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
+  getAvailability: (eventTypeId) => request(`/api/availability/${eventTypeId}`),
+  setAvailability: (data) => request("/api/availability", { method: "POST", body: data }),
 
   // Slots
-  getSlots: (eventTypeId, date) =>
-    request(`/api/slots/${eventTypeId}?date=${date}`),
+  getSlots: (eventTypeId, date) => request(`/api/slots/${eventTypeId}?date=${date}`),
 
   // Bookings
   getAllBookings: () => request("/api/bookings"),
   getBookings: (eventTypeId) => request(`/api/bookings/${eventTypeId}`),
   getBookingById: (id) => request(`/api/bookings/id/${id}`),
-  createBooking: (data) =>
-    request("/api/bookings", { method: "POST", body: JSON.stringify(data) }),
+  createBooking: (data) => request("/api/bookings", { method: "POST", body: data }),
   cancelBooking: (id) => request(`/api/bookings/${id}`, { method: "DELETE" }),
-  rescheduleBooking: (id, data) => 
-    request(`/api/bookings/${id}/reschedule`, { method: "PATCH", body: JSON.stringify(data) }),
+  rescheduleBooking: (id, data) => request(`/api/bookings/${id}/reschedule`, { method: "PATCH", body: data }),
 };

@@ -104,58 +104,60 @@ export default function AvailabilityPage() {
   };
 
   return (
-    <div style={{ maxWidth: "640px" }}>
-      <h1 style={{ fontSize: "24px", fontWeight: 700, marginBottom: "8px" }}>Availability</h1>
-      <p style={{ color: "var(--color-text-secondary)", marginBottom: "32px", fontSize: "14px" }}>
+    <div style={{ maxWidth: "640px", animation: "fadeIn 0.4s ease-out" }}>
+      <h1 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "8px", letterSpacing: "-0.02em" }}>Availability</h1>
+      <p style={{ color: "var(--color-text-tertiary)", marginBottom: "32px", fontSize: "15px" }}>
         Configure when you're available for meetings. Guests will only see available slots.
       </p>
 
-      <div style={{ background: "var(--color-bg-primary)", padding: "24px", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)" }}>
+      <div style={{ background: "var(--color-bg-primary)", padding: "32px", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)" }}>
         
-        <div style={{ marginBottom: "24px", display: "flex", gap: "16px" }}>
+        <div style={{ marginBottom: "32px", display: "flex", gap: "16px" }}>
           <div style={{ flex: 1 }}>
-            <label style={{ fontSize: "14px", fontWeight: 500, display: "block", marginBottom: "8px" }}>Event Type</label>
+            <label style={{ fontSize: "14px", fontWeight: 600, display: "block", marginBottom: "8px" }}>Event Type</label>
             <select value={selectedEventId} onChange={e => setSelectedEventId(e.target.value)}
-              style={{ width: "100%", padding: "10px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", background: "var(--color-bg-secondary)" }}>
-              <option value="">Select an event type to edit...</option>
+              style={{ width: "100%", padding: "12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", background: "var(--color-bg-subtle)", fontSize: "14px", outline: "none" }}>
+              <option value="">Select an event type...</option>
               {events.map(ev => <option key={ev.id} value={ev.id}>{ev.title}</option>)}
             </select>
           </div>
           <div style={{ flex: 1 }}>
-            <label style={{ fontSize: "14px", fontWeight: 500, display: "block", marginBottom: "8px" }}>Timezone</label>
+            <label style={{ fontSize: "14px", fontWeight: 600, display: "block", marginBottom: "8px" }}>Timezone</label>
             <input type="text" readOnly value={timezone} disabled
-              style={{ width: "100%", padding: "10px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", background: "var(--color-bg-secondary)", opacity: 0.7 }} />
+              style={{ width: "100%", padding: "12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", background: "var(--color-bg-subtle)", fontSize: "14px", opacity: 0.6 }} />
           </div>
         </div>
 
         {selectedEventId && !loadingAvail && (
-          <div>
-            <label style={{ fontSize: "14px", fontWeight: 500, display: "block", marginBottom: "16px" }}>Weekly Schedule</label>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ animation: "slideUp 0.3s ease-out" }}>
+            <label style={{ fontSize: "14px", fontWeight: 600, display: "block", marginBottom: "16px" }}>Weekly Schedule</label>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: "var(--color-border-subtle)", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
               {DAYS.map(day => {
                 const isEnabled = schedule[day.value] !== null;
                 const conf = schedule[day.value] || DEFAULT_TIME;
                 
                 return (
-                  <div key={day.value} style={{ display: "flex", alignItems: "center", padding: "12px 16px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", background: isEnabled ? "var(--color-bg-primary)" : "var(--color-bg-secondary)" }}>
-                    <div style={{ display: "flex", alignItems: "center", width: "120px" }}>
-                      <input type="checkbox" checked={isEnabled} onChange={() => toggleDay(day.value)} style={{ width: "16px", height: "16px", marginRight: "12px", cursor: "pointer" }} />
-                      <span style={{ fontSize: "14px", fontWeight: 500, opacity: isEnabled ? 1 : 0.5 }}>{day.label}</span>
+                  <div key={day.value} style={{ display: "flex", alignItems: "center", padding: "16px 20px", background: "var(--color-bg-primary)" }}>
+                    <div style={{ display: "flex", alignItems: "center", width: "140px" }}>
+                      <input type="checkbox" checked={isEnabled} onChange={() => toggleDay(day.value)} style={{ width: "18px", height: "18px", marginRight: "12px", cursor: "pointer", accentColor: "black" }} />
+                      <span style={{ fontSize: "14px", fontWeight: 600, color: isEnabled ? "var(--color-text-primary)" : "var(--color-text-tertiary)" }}>{day.label}</span>
                     </div>
 
                     {isEnabled ? (
                       <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1 }}>
                         <input type="time" value={conf.startTime} onChange={e => setSchedule({ ...schedule, [day.value]: { ...conf, startTime: e.target.value }})}
-                          style={{ padding: "6px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)" }} />
-                        <span style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>–</span>
+                          style={{ padding: "8px 12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", fontSize: "14px", outline: "none" }} />
+                        <span style={{ fontSize: "13px", color: "var(--color-text-tertiary)" }}>–</span>
                         <input type="time" value={conf.endTime} onChange={e => setSchedule({ ...schedule, [day.value]: { ...conf, endTime: e.target.value }})}
-                          style={{ padding: "6px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)" }} />
-                        <button onClick={() => applyToAll(day.value)} title="Copy to all enabled days" style={{ marginLeft: "auto", fontSize: "12px", background: "none", border: "none", cursor: "pointer", color: "var(--color-text-secondary)" }}>
-                          📋 Apply to all
+                          style={{ padding: "8px 12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", fontSize: "14px", outline: "none" }} />
+                        <button onClick={() => applyToAll(day.value)} title="Copy to all enabled days" style={{ marginLeft: "auto", fontSize: "12px", fontWeight: 600, background: "none", border: "none", cursor: "pointer", color: "var(--color-text-tertiary)", transition: "var(--transition-fast)" }} 
+                         onMouseEnter={e => e.target.style.color = "var(--color-text-primary)"}
+                         onMouseLeave={e => e.target.style.color = "var(--color-text-tertiary)"}>
+                          Apply to all
                         </button>
                       </div>
                     ) : (
-                      <div style={{ fontSize: "14px", color: "var(--color-text-tertiary)" }}>Unavailable</div>
+                      <div style={{ fontSize: "14px", color: "var(--color-text-tertiary)", fontStyle: "italic" }}>Unavailable</div>
                     )}
                   </div>
                 );
@@ -166,11 +168,11 @@ export default function AvailabilityPage() {
       </div>
 
       {selectedEventId && (
-        <div style={{ marginTop: "24px", display: "flex", justifyContent: "flex-end" }}>
+        <div style={{ marginTop: "32px", display: "flex", justifyContent: "flex-end" }}>
           <button onClick={handleSave} disabled={saving} style={{
-            padding: "10px 24px", background: "var(--color-brand)", color: "white", border: "none", borderRadius: "var(--radius-md)", fontWeight: 500, cursor: saving ? "not-allowed" : "pointer"
+            padding: "12px 28px", background: "var(--color-brand)", color: "white", border: "none", borderRadius: "var(--radius-md)", fontWeight: 600, fontSize: "14px", cursor: saving ? "not-allowed" : "pointer", boxShadow: "0 1px 2px rgba(0,0,0,0.1)", transition: "var(--transition-fast)"
           }}>
-            {saving ? "Saving..." : "Save Availability"}
+            {saving ? "Saving..." : "Save Settings"}
           </button>
         </div>
       )}

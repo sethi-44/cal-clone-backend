@@ -88,18 +88,19 @@ export default function DashboardPage() {
   }, [bookings, tab, eventFilter, searchQuery, now]);
 
   return (
-    <div>
-      <h1 style={{ fontSize: "24px", fontWeight: 700, marginBottom: "24px" }}>Bookings</h1>
+    <div style={{ animation: "fadeIn 0.4s ease-out" }}>
+      <h1 style={{ fontSize: "24px", fontWeight: 700, marginBottom: "32px", letterSpacing: "-0.01em" }}>Bookings</h1>
 
       {/* Tabs */}
-      <div style={{ display: "flex", borderBottom: "1px solid var(--color-border)", marginBottom: "24px" }}>
+      <div style={{ display: "flex", gap: "24px", marginBottom: "32px", borderBottom: "1px solid var(--color-border-subtle)" }}>
         {["upcoming", "past", "cancelled"].map((t) => (
           <button key={t} onClick={() => setTab(t)} style={{
-            padding: "10px 20px", background: "none", border: "none", 
+            padding: "0 0 12px 0", background: "none", border: "none", 
             borderBottom: tab === t ? "2px solid var(--color-brand)" : "2px solid transparent",
-            color: tab === t ? "var(--color-text-primary)" : "var(--color-text-secondary)",
-            fontWeight: tab === t ? 600 : 400, fontSize: "14px", cursor: "pointer",
-            textTransform: "capitalize"
+            color: tab === t ? "var(--color-text-primary)" : "var(--color-text-tertiary)",
+            fontWeight: tab === t ? 600 : 500, fontSize: "14px", cursor: "pointer",
+            textTransform: "capitalize",
+            transition: "var(--transition-fast)"
           }}>
             {t}
           </button>
@@ -108,12 +109,12 @@ export default function DashboardPage() {
 
       {/* Filters */}
       <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
-        <input type="text" placeholder="Search name or email..." value={searchQuery}
+        <input type="text" placeholder="Search..." value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ flex: 1, padding: "8px 12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", fontSize: "14px" }}
+          style={{ flex: 1, padding: "10px 14px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", fontSize: "14px", outline: "none" }}
         />
         <select value={eventFilter} onChange={(e) => setEventFilter(e.target.value)}
-          style={{ padding: "8px 12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", fontSize: "14px", background: "var(--color-bg-primary)" }}
+          style={{ padding: "10px 14px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", fontSize: "14px", background: "var(--color-bg-primary)", outline: "none" }}
         >
           <option value="all">All Events</option>
           {events.map((ev) => <option key={ev.id} value={ev.id}>{ev.title}</option>)}
@@ -131,44 +132,32 @@ export default function DashboardPage() {
           description={searchQuery ? "Try adjusting your search" : "No bookings found matching the current criteria."}
         />
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {filteredBookings.map((booking) => {
+        <div className="card" style={{ display: "flex", flexDirection: "column" }}>
+          {filteredBookings.map((booking, index) => {
             const start = new Date(booking.startTime);
             return (
               <div key={booking.id} style={{
                 display: "flex", justifyContent: "space-between", alignItems: "center",
-                padding: "20px", background: "var(--color-bg-primary)",
-                border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)"
+                padding: "20px", borderBottom: index === filteredBookings.length - 1 ? "none" : "1px solid var(--color-border-subtle)",
               }}>
                 <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
-                  <div style={{ 
-                    textAlign: "center", background: "var(--color-bg-secondary)", 
-                    padding: "10px", borderRadius: "var(--radius-sm)", minWidth: "70px" 
-                  }}>
-                    <div style={{ fontSize: "12px", color: "var(--color-text-secondary)", textTransform: "uppercase" }}>
-                      {start.toLocaleDateString("en-US", { month: "short" })}
-                    </div>
-                    <div style={{ fontSize: "20px", fontWeight: 600 }}>
-                      {start.getDate()}
-                    </div>
-                  </div>
+                   <div style={{ fontSize: "14px", color: "var(--color-text-tertiary)", minWidth: "120px" }}>
+                      <div style={{ fontWeight: 600, color: "var(--color-text-primary)" }}>
+                        {start.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                      </div>
+                      <div>
+                        {start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                      </div>
+                   </div>
                   
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <h4 style={{ fontSize: "16px", fontWeight: 600 }}>{booking.name}</h4>
-                      <span style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>•</span>
-                      <span style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>{booking.email}</span>
+                      <h4 style={{ fontSize: "15px", fontWeight: 600 }}>{booking.name}</h4>
+                      <span style={{ fontSize: "13px", color: "var(--color-text-tertiary)" }}>{booking.email}</span>
                     </div>
                     
-                    <div style={{ fontSize: "14px", color: "var(--color-text-secondary)", marginTop: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span style={{ display: "inline-flex", alignItems: "center", background: "var(--color-bg-tertiary)", padding: "2px 8px", borderRadius: "10px", fontSize: "12px", color: "var(--color-text-primary)"}}>
-                        {booking.eventType?.title || "Unknown Event"}
-                      </span>
-                      <span>
-                        {start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                        {' – '}
-                        {new Date(booking.endTime).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                      </span>
+                    <div style={{ fontSize: "13px", color: "var(--color-text-tertiary)", marginTop: "4px" }}>
+                      Scheduled for <span style={{ color: "var(--color-text-secondary)", fontWeight: 500 }}>{booking.eventType?.title || "Event"}</span>
                     </div>
                   </div>
                 </div>
@@ -176,14 +165,14 @@ export default function DashboardPage() {
                 {tab === "upcoming" && (
                   <div style={{ display: "flex", gap: "8px" }}>
                     <a href={`/reschedule/${booking.id}`} style={{
-                      padding: "8px 12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)",
-                      background: "transparent", color: "var(--color-text-primary)", fontSize: "13px", cursor: "pointer", textDecoration: "none"
+                      padding: "6px 14px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)",
+                      background: "white", color: "var(--color-text-primary)", fontSize: "13px", cursor: "pointer", textDecoration: "none", fontWeight: 600
                     }}>
                       Reschedule
                     </a>
                     <button onClick={() => handleCancel(booking.id)} style={{
-                      padding: "8px 12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)",
-                      background: "transparent", color: "var(--color-error)", fontSize: "13px", cursor: "pointer",
+                      padding: "6px 14px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)",
+                      background: "transparent", color: "var(--color-error)", fontSize: "13px", cursor: "pointer", fontWeight: 600
                     }}>
                       Cancel
                     </button>

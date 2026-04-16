@@ -18,24 +18,27 @@ export default function AdminLayout({ children }) {
       <div style={{ display: "flex", minHeight: "100vh" }}>
         {/* Sidebar */}
         <aside style={{
-          width: "var(--sidebar-width)",
-          borderRight: "1px solid var(--color-border)",
-          background: "var(--color-bg-primary)",
-          padding: "24px 0",
+          width: "240px",
+          borderRight: "1px solid var(--cal-border-subtle)",
+          background: "var(--cal-bg)",
           display: "flex",
           flexDirection: "column",
+          position: "sticky",
+          top: 0,
+          height: "100vh",
         }}>
-          <div style={{
-            padding: "0 24px 24px",
-            borderBottom: "1px solid var(--color-border)",
-            marginBottom: "16px",
-          }}>
-            <h1 style={{ fontSize: "20px", fontWeight: 700, letterSpacing: "-0.5px" }}>
-              ⚡ CalClone
-            </h1>
+          <div style={{ padding: "16px 20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+               <div style={{ 
+                 width: "28px", height: "28px", background: "var(--cal-brand)", 
+                 borderRadius: "6px", display: "flex", alignItems: "center", 
+                 justifyContent: "center", color: "white", fontSize: "14px", fontWeight: 800 
+               }}>C</div>
+               <span style={{ fontWeight: 700, fontSize: "15px", letterSpacing: "-0.02em" }}>CalClone</span>
+            </div>
           </div>
 
-          <nav style={{ flex: 1 }}>
+          <nav style={{ flex: 1, padding: "12px" }}>
             {navItems.map((item) => {
               const isActive = item.href === "/"
                 ? pathname === "/"
@@ -45,21 +48,29 @@ export default function AdminLayout({ children }) {
                 <Link key={item.href} href={item.href} style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "12px",
-                  padding: "10px 24px",
-                  fontSize: "14px",
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? "var(--color-text-primary)" : "var(--color-text-secondary)",
-                  background: isActive ? "var(--color-bg-tertiary)" : "transparent",
-                  borderRight: isActive ? "2px solid var(--color-brand)" : "2px solid transparent",
-                  transition: "var(--transition-fast)",
+                  gap: "8px",
+                  padding: "8px 12px",
+                  marginBottom: "2px",
+                  fontSize: "13px",
+                  borderRadius: "var(--radius-md)",
+                  fontWeight: 500,
+                  color: isActive ? "var(--cal-text-emphasis)" : "var(--cal-text-subtle)",
+                  background: isActive ? "var(--cal-bg-muted)" : "transparent",
+                  transition: "all var(--transition-fast)",
                 }}>
-                  <span>{item.icon}</span>
+                  <span style={{ fontSize: "16px" }}>{item.icon}</span>
                   {item.label}
                 </Link>
               );
             })}
           </nav>
+          
+          <div style={{ padding: "20px", borderTop: "1px solid var(--cal-border-subtle)" }}>
+             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "24px", height: "24px", background: "var(--cal-bg-subtle)", borderRadius: "50%" }} />
+                <span style={{ fontSize: "12px", fontWeight: 500 }}>Default User</span>
+             </div>
+          </div>
         </aside>
 
         {/* Main Content */}

@@ -1,125 +1,132 @@
-# CalClone — Scheduling Platform
+<p align="center">
+  <img src="./calclone_banner_1776351897994.png" width="800" alt="CalClone Banner">
+</p>
 
-A full-stack scheduling application inspired by [Cal.com](https://cal.com), built as part of the Scaler SDE Intern Fullstack Assignment.
+<h1 align="center">CalClone</h1>
 
-## 🛠 Tech Stack
+<p align="center">
+  A high-fidelity, open-source scheduling infrastructure inspired by Cal.com. Built for speed, reliability, and global timezone synchronization.
+</p>
 
-| Layer      | Technology                     |
-|------------|--------------------------------|
-| Frontend   | Next.js 16 (App Router), React 19, Tailwind CSS 4 |
-| Backend    | Node.js, Express 5             |
-| Database   | PostgreSQL, Prisma ORM 5       |
-| Validation | Zod                            |
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js">
+  <img src="https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white" alt="Prisma">
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express">
+</p>
 
-## ✨ Features
+---
 
-### Core Features
-- **Event Types Management** — Create, edit, delete event types with title, description, duration, and URL slug
-- **Availability Settings** — Set available days and time ranges per event type with timezone support
-- **Public Booking Page** — Calendar view, time slot selection, booking form with name/email, double-booking prevention
-- **Bookings Dashboard** — View upcoming/past bookings, cancel bookings, filter by event type and search
+## 🌟 Overview
 
-### Bonus Features
-- Buffer time between meetings
-- Past slot filtering (can't book times that have already passed)
-- Soft-delete for bookings (preserves history)
-- Input validation on all API endpoints
-- Responsive sidebar navigation
+CalClone is a production-ready scheduling engine that solves the complex problem of cross-timezone availability and atomic booking management. Gone are the days of manual time zone calculations and "Oops, I'm double booked."
 
-## 📂 Project Structure
+### Key Highlights
+- **💨 Blazing Fast**: Next.js App Router for instant page transitions.
+- **🌍 Global by Default**: Native `date-fns-tz` integration ensures slots are flawless across all continents.
+- **🔒 Atomic Integrity**: Prisma transactions prevent race conditions during booking and availability updates.
+- **🎨 Minimalist Aesthetic**: Modeled after Cal.com's premium design tokens for a professional SaaS feel.
 
+---
+
+## 🛠 Features
+
+### 📅 Event Management
+Create specialized scheduling pages for 15m, 30m, or 60m meetings. Customize durations, descriptions, and permanent URL slugs.
+
+### 🕐 Intelligent Availability
+Define your weekly schedule per event type. Set specific windows (e.g., 09:00 - 17:00) and let CalClone handle the slot generation logic, including **buffer times** between meetings.
+
+### 🚀 Public Booking Flow
+A friction-less experience for your guests. 
+- **Calendar View**: High-contrast, interactive calendar.
+- **Dynamic Slotting**: Only shows real-time available windows.
+- **Instant Confirmation**: Automatic "mock" email notifications for both host and guest.
+
+### 📋 Pro Dashboard
+Manage your schedule like a pro. Track upcoming sessions, view history, and cancel appointments with one click.
+
+### 🔄 Rescheduling (Bonus)
+Specialized one-time use links that allow users to move their appointment without the manual back-and-forth.
+
+---
+
+## 🏗 System Architecture
+
+```mermaid
+graph TD
+    User((User)) <--> Frontend[Next.js App Router]
+    Frontend <--> API[Express API]
+    API <--> Service[Business Logic Services]
+    Service <--> DB[(PostgreSQL + Prisma)]
+    Service -- Mock --> Email[Email Notification Service]
 ```
-cal-clone/
-├── client/                  # Next.js frontend
-│   ├── app/                 # App Router pages
-│   │   ├── (admin)/         # Admin pages (with sidebar layout)
-│   │   └── (public)/        # Public booking page
-│   ├── components/          # Reusable UI components
-│   ├── hooks/               # Custom React hooks
-│   └── lib/                 # API client
-├── server/                  # Express backend
-│   ├── prisma/              # Schema + migrations + seed
-│   └── src/
-│       ├── config/          # Prisma client, env config
-│       ├── controllers/     # Request/response handling
-│       ├── middleware/       # Validation, error handling
-│       ├── routes/          # API route definitions
-│       ├── services/        # Business logic
-│       ├── utils/           # Slot generation
-│       └── validators/      # Zod schemas
-└── README.md
+
+### Database Schema
+```mermaid
+erDiagram
+    EventType ||--o{ Availability : "defines"
+    EventType ||--o{ Booking : "has"
+    EventType {
+        string id PK
+        string title
+        int duration
+        int bufferTime
+        string slug
+    }
+    Availability {
+        string id PK
+        int dayOfWeek
+        string startTime
+        string endTime
+        string timezone
+    }
+    Booking {
+        string id PK
+        string name
+        string email
+        datetime startTime
+        datetime endTime
+        string status
+    }
 ```
 
-## 🚀 Setup Instructions
+---
 
-### Prerequisites
-- Node.js 18+
-- PostgreSQL running locally
+## 🚀 Installation & Setup
 
-### 1. Clone the repository
-```bash
-git clone <repo-url>
-cd cal-clone
-```
+### 1. Prerequisites
+- **Node.js**: 18.x or higher
+- **PostgreSQL**: Local instance running
 
-### 2. Setup the backend
+### 2. Backend Setup
 ```bash
 cd server
 npm install
-
-# Create .env file with your database URL
-echo 'DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/cal_clone"' > .env
-
-# Run database migrations
-npx prisma migrate dev --name init
-
-# Seed sample data
+# Configure DATABASE_URL in .env
+npx prisma migrate dev
 npx prisma db seed
-
-# Start the server
-npm start
-```
-
-### 3. Setup the frontend
-```bash
-cd client
-npm install
-
-# Create .env.local
-echo 'NEXT_PUBLIC_API_URL=http://localhost:5000' > .env.local
-
-# Start the dev server
 npm run dev
 ```
 
-### 4. Open the app
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
-
-## 📊 Database Schema
-
-```
-EventType (1) ──── (N) Availability
-EventType (1) ──── (N) Booking
+### 3. Frontend Setup
+```bash
+cd client
+npm install
+# Configure NEXT_PUBLIC_API_URL in .env.local
+npm run dev
 ```
 
-- **EventType**: id, title, description, duration, slug, bufferTime
-- **Availability**: id, eventTypeId, dayOfWeek, startTime, endTime, timezone
-- **Booking**: id, eventTypeId, name, email, startTime, endTime, status
+---
 
-## 🔑 Key Design Decisions
+## 🧪 Technical Excellence
 
-1. **Atomic availability saves** — Uses Prisma transactions to prevent partial data loss
-2. **Double-booking prevention** — Database unique constraint + server-side validation
-3. **Soft delete for bookings** — Status enum (CONFIRMED/CANCELLED) instead of hard delete
-4. **Pure slot generation** — Arithmetic-only algorithm with no Date object dependency
-5. **Timezone-aware slots** — Day-of-week calculated in the host's timezone
-6. **Input validation** — Zod schemas on all mutation endpoints
-7. **Layered architecture** — Routes → Controllers → Services → Prisma
+- **Pure Arithmetic Slotting**: Slot generation uses a custom minute-based algorithm to avoid the common "Date object traps" in JavaScript.
+- **UTC-First Persistence**: All timestamps are normalized to UTC in the database, ensuring absolute truth regardless of server location.
+- **Soft-Delete Lifecycle**: Bookings are never truly destroyed; they follow a state-machine (CONFIRMED -> CANCELLED) to preserve data history.
 
-## 🤔 Assumptions
+---
 
-- A default user is assumed to be logged in (no authentication)
-- Availability timezone defaults to browser timezone, stored per availability record
-- Booking times are stored in UTC
-- All event types are visible to all visitors on the public booking page
+<p align="center">
+  Built with ❤️ for the Scaler SDE Intern Fullstack Assignment.
+</p>

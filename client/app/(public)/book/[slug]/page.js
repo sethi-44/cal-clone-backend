@@ -119,63 +119,74 @@ export default function BookingPage() {
       <div style={{ display: "flex", flexDirection: "column", md: { flexDirection: "row" }, background: "var(--color-bg-primary)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-lg)", overflow: "hidden" }}>
         
         {/* Left Side: Event Info */}
-        <div style={{ padding: "32px", borderRight: "1px solid var(--color-border)", minWidth: "300px", flexShrink: 0 }}>
-          <div style={{ fontSize: "14px", color: "var(--color-text-secondary)", fontWeight: 500, marginBottom: "8px" }}>
-            ⚡ CalClone
+        <div style={{ padding: "40px", borderRight: "1px solid var(--cal-border-subtle)", minWidth: "320px", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "32px" }}>
+             <div style={{ 
+               width: "24px", height: "24px", background: "var(--cal-brand)", 
+               borderRadius: "5px", display: "flex", alignItems: "center", 
+               justifyContent: "center", color: "white", fontSize: "12px", fontWeight: 800 
+             }}>C</div>
+             <span style={{ fontWeight: 600, fontSize: "14px", letterSpacing: "-0.01em", color: "var(--cal-text-muted)" }}>CalClone</span>
           </div>
-          <h1 style={{ fontSize: "24px", fontWeight: 700, margin: "0 0 12px", color: "var(--color-text-primary)" }}>
+
+          <h1 style={{ fontSize: "28px", fontWeight: 700, margin: "0 0 16px", color: "var(--cal-text-emphasis)", letterSpacing: "-0.03em" }}>
             {event.title}
           </h1>
-          <div style={{ display: "flex", gap: "8px", alignItems: "center", color: "var(--color-text-secondary)", fontSize: "14px", marginBottom: "20px" }}>
-            <span>⏱️ {event.duration} min</span>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center", color: "var(--cal-text-subtle)", fontSize: "14px", marginBottom: "24px", fontWeight: 500 }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>⏱️ {event.duration} min</span>
           </div>
-          <p style={{ fontSize: "15px", lineHeight: "1.5", color: "var(--color-text-secondary)" }}>
+          <p style={{ fontSize: "15px", lineHeight: "1.6", color: "var(--cal-text-subtle)" }}>
             {event.description}
           </p>
         </div>
 
         {/* Right Side: Booking Flow */}
-        <div style={{ padding: "32px", flex: 1, background: "var(--color-bg-secondary)" }}>
+        <div style={{ padding: "40px", flex: 1, background: "var(--cal-bg)" }}>
           {error && (
-            <div style={{ padding: "12px 16px", background: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca", borderRadius: "var(--radius-md)", fontSize: "14px", marginBottom: "24px" }}>
+            <div style={{ padding: "12px 16px", background: "#fef2f2", color: "#991b1b", border: "1px solid #fecaca", borderRadius: "8px", fontSize: "14px", marginBottom: "24px" }}>
               {error}
             </div>
           )}
 
           {!selectedSlot ? (
             <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 600, marginBottom: "20px" }}>Select a Date & Time</h2>
+              <h2 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "24px", color: "var(--cal-text-emphasis)" }}>Select a Date & Time</h2>
               
-              <div style={{ display: "flex", gap: "32px", flexWrap: "wrap", alignItems: "flex-start" }}>
+              <div style={{ display: "flex", gap: "40px", flexWrap: "wrap", alignItems: "flex-start" }}>
                 <Calendar 
                   selectedDate={date} 
                   onSelectDate={(d) => { setDate(d); setError(null); }} 
                   availableDays={availableDays} 
                 />
 
-                <div style={{ flex: 1, minWidth: "200px" }}>
+                <div style={{ flex: 1, minWidth: "240px" }}>
                   {date ? (
                     slotsLoading ? (
-                      <div style={{ color: "var(--color-text-tertiary)", fontSize: "14px" }}>Loading times...</div>
+                      <div style={{ color: "var(--cal-text-muted)", fontSize: "14px", padding: "20px" }}>Loading times...</div>
                     ) : slots.length === 0 ? (
-                      <div style={{ color: "var(--color-text-tertiary)", fontSize: "14px" }}>No times available on this date.</div>
+                      <div style={{ color: "var(--cal-text-muted)", fontSize: "14px", padding: "20px" }}>No times available on this date.</div>
                     ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxHeight: "380px", overflowY: "auto", paddingRight: "8px" }}>
-                        <p style={{ fontSize: "13px", color: "var(--color-text-secondary)", margin: "0 0 8px" }}>
-                          Times in your timezone ({fetchTz()})
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "420px", overflowY: "auto", paddingRight: "8px" }}>
+                        <p style={{ fontSize: "12px", fontWeight: 600, color: "var(--cal-text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
+                          Available Times
                         </p>
                         {slots.map((s) => (
                           <button
                             key={s.utcStart}
                             disabled={!s.available}
                             onClick={() => setSelectedSlot(s)}
+                            className={s.available ? "cal-card" : ""}
                             style={{
-                              padding: "14px 16px", border: `1px solid ${!s.available ? "var(--color-border)" : "var(--color-brand)"}`,
-                              borderRadius: "var(--radius-sm)", fontSize: "15px", fontWeight: 500,
-                              background: !s.available ? "var(--color-bg-tertiary)" : "var(--color-bg-primary)",
-                              color: !s.available ? "var(--color-text-tertiary)" : "var(--color-brand)",
-                              cursor: !s.available ? "not-allowed" : "pointer", textDecoration: !s.available ? "line-through" : "none",
-                              transition: "var(--transition-fast)"
+                              padding: "12px 16px", 
+                              border: !s.available ? "1px solid var(--cal-border-subtle)" : "1px solid var(--cal-border)",
+                              borderRadius: "var(--radius-md)", 
+                              fontSize: "14px", 
+                              fontWeight: 600,
+                              background: !s.available ? "var(--cal-bg-muted)" : "var(--cal-bg)",
+                              color: !s.available ? "var(--cal-text-muted)" : "var(--cal-text-emphasis)",
+                              cursor: !s.available ? "not-allowed" : "pointer", 
+                              textDecoration: !s.available ? "line-through" : "none",
+                              textAlign: "center"
                             }}
                           >
                             {new Date(s.utcStart).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
@@ -184,7 +195,7 @@ export default function BookingPage() {
                       </div>
                     )
                   ) : (
-                    <div style={{ color: "var(--color-text-tertiary)", fontSize: "14px" }}>
+                    <div style={{ color: "var(--cal-text-muted)", fontSize: "14px", padding: "20px", textAlign: "center", border: "2px dashed var(--cal-border-subtle)", borderRadius: "var(--radius-lg)" }}>
                       Select a date to see available times.
                     </div>
                   )}
@@ -192,36 +203,37 @@ export default function BookingPage() {
               </div>
             </div>
           ) : (
-            <div style={{ animation: "slideInRight 0.2s ease-out" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
-                <button onClick={() => setSelectedSlot(null)} style={{ background: "none", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", padding: "6px 12px", cursor: "pointer", fontSize: "13px" }}>
+            <div style={{ animation: "slideUp 0.3s ease-out" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
+                <button onClick={() => setSelectedSlot(null)} style={{ background: "none", border: "1px solid var(--cal-border)", borderRadius: "var(--radius-md)", padding: "8px 16px", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}>
                   ← Back
                 </button>
-                <div style={{ fontSize: "15px", fontWeight: 500 }}>
-                  Selected: {new Date(date).toLocaleDateString("en-US", { weekday: "short", month: "long", day: "numeric" })} at {new Date(selectedSlot.utcStart).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                <div style={{ fontSize: "15px", fontWeight: 600, color: "var(--cal-text-emphasis)" }}>
+                  {new Date(date).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} at {new Date(selectedSlot.utcStart).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                 </div>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "24px", maxWidth: "480px" }}>
                 <div>
-                  <label style={{ fontSize: "14px", fontWeight: 500, marginBottom: "6px", display: "block" }}>Name</label>
-                  <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                    style={{ width: "100%", padding: "12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", fontSize: "15px" }} />
+                  <label style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px", display: "block", color: "var(--cal-text)" }}>Name</label>
+                  <input type="text" required placeholder="John Doe" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
+                    style={{ width: "100%", padding: "12px 16px", border: "1px solid var(--cal-border)", borderRadius: "var(--radius-md)", fontSize: "14px", background: "var(--cal-bg-muted)", outline: "none" }} />
                 </div>
                 <div>
-                  <label style={{ fontSize: "14px", fontWeight: 500, marginBottom: "6px", display: "block" }}>Email</label>
-                  <input type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})}
-                    style={{ width: "100%", padding: "12px", border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", fontSize: "15px" }} />
+                  <label style={{ fontSize: "14px", fontWeight: 600, marginBottom: "8px", display: "block", color: "var(--cal-text)" }}>Email</label>
+                  <input type="email" required placeholder="john@example.com" value={form.email} onChange={e => setForm({...form, email: e.target.value})}
+                    style={{ width: "100%", padding: "12px 16px", border: "1px solid var(--cal-border)", borderRadius: "var(--radius-md)", fontSize: "14px", background: "var(--cal-bg-muted)", outline: "none" }} />
                 </div>
 
-                <div style={{ marginTop: "12px" }}>
+                <div style={{ marginTop: "16px" }}>
                   <button 
                     onClick={handleBooking} 
                     disabled={submitting || !isFormValid}
+                    className="cal-button-primary"
                     style={{
-                      width: "100%", padding: "16px", background: "var(--color-brand)", color: "white", 
-                      fontSize: "16px", fontWeight: 600, border: "none", borderRadius: "var(--radius-md)",
-                      cursor: (submitting || !isFormValid) ? "not-allowed" : "pointer", opacity: (submitting || !isFormValid) ? 0.7 : 1, transition: "var(--transition-fast)"
+                      width: "100%", padding: "16px", 
+                      fontSize: "15px", border: "none", borderRadius: "var(--radius-md)",
+                      cursor: (submitting || !isFormValid) ? "not-allowed" : "pointer", opacity: (submitting || !isFormValid) ? 0.6 : 1
                     }}
                   >
                     {submitting ? "Confirming..." : "Confirm Booking"}
@@ -231,6 +243,7 @@ export default function BookingPage() {
             </div>
           )}
         </div>
+
 
       </div>
     </div>
