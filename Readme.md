@@ -107,4 +107,4 @@ npm run dev
 
 ## 👨‍💻 Author
 
-Divyanshu Sethi
+Harshit Sethi
