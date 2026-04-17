@@ -6,9 +6,11 @@ const createEventSchema = z.object({
   duration: z.number({ coerce: true }).int().min(5, "Min 5 minutes").max(480),
   slug: z
     .string()
-    .min(1)
     .max(50)
-    .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes"),
+    .refine((val) => val === "" || /^[a-z0-9-]+$/.test(val), {
+      message: "Slug must be lowercase alphanumeric with dashes",
+    })
+    .optional(),
   bufferTime: z.number({ coerce: true }).int().min(0).max(60).optional().default(0),
 });
 
@@ -18,9 +20,10 @@ const updateEventSchema = z.object({
   duration: z.number({ coerce: true }).int().min(5).max(480).optional(),
   slug: z
     .string()
-    .min(1)
     .max(50)
-    .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with dashes")
+    .refine((val) => val === "" || /^[a-z0-9-]+$/.test(val), {
+      message: "Slug must be lowercase alphanumeric with dashes",
+    })
     .optional(),
   bufferTime: z.number({ coerce: true }).int().min(0).max(60).optional(),
 });
